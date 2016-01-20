@@ -53,6 +53,10 @@ private[parsing] abstract class HttpMessagePartParser(val settings: ParserSettin
         case _   ⇒ badProtocol
       }
       cursor + 8
+    } else if (c(0) == 'I' && c(1) == 'C' && c(2) == 'Y') {
+      // Icecast protocol
+      protocol = `HTTP/1.0`
+      cursor + 3
     } else badProtocol
   }
 
