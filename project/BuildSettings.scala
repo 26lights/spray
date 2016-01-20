@@ -10,7 +10,7 @@ import com.typesafe.sbt.osgi.SbtOsgi
 import SbtOsgi._
 
 object BuildSettings {
-  val VERSION = "1.3.3"
+  val VERSION = "1.3.3-icy-26L"
 
   lazy val basicSettings = seq(
     version               := NightlyBuildSupport.buildVersion(VERSION),
@@ -39,7 +39,6 @@ object BuildSettings {
     basicSettings ++ formatSettings ++
     NightlyBuildSupport.settings ++
     net.virtualvoid.sbt.graph.Plugin.graphSettings ++
-    SbtPgp.settings ++
     seq(
       // scaladoc settings
       (scalacOptions in doc) <++= (name, version).map { (n, v) => Seq("-doc-title", n, "-doc-version", v) },
@@ -47,20 +46,8 @@ object BuildSettings {
       // publishing
       crossPaths := true,
       publishMavenStyle := true,
-      SbtPgp.useGpg := true,
-      publishTo <<= version { version =>
-        Some {
-          if (version.contains("-") || true) { // sonatype publishing currently disabled
-            "spray nexus" at {
-              // public uri is repo.spray.io, we use an SSH tunnel to the nexus here
-              "http://localhost:42424/content/repositories/" + {
-                if (version.trim.endsWith("SNAPSHOT")) "snapshots/" else
-                if (NightlyBuildSupport.isNightly) "nightlies/" else "releases/"
-              }
-            }
-          } else "sonatype release staging" at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-        }
-      },
+      credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+      publishTo := Some("releases" at "http://build.26source.org/nexus/content/repositories/releases"),
       pomIncludeRepository := { _ => false },
       pomExtra :=
         <scm>
